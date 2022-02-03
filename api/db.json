@@ -1,0 +1,538 @@
+[
+{
+    "model": "sessions.session",
+    "pk": "azsoji9fs8ib82x595qjzcfj4z2rcdrn",
+    "fields": {
+        "session_data": ".eJxVjDsOwjAQBe_iGln-rbOmpOcM1vqHA8iW4qRC3B0ipYD2zcx7MU_bWv028uLnxM5MsdPvFig-cttBulO7dR57W5c58F3hBx382lN-Xg7376DSqN-aitUEiJiyQEWo0aIQKToHWCIo0jaUaXLZoJFBFxmdiY5ACqcgAbL3B9SWNzY:1lv29R:FCjOvK0o37HtbrsXmtExbFZZSbtihWPHhl703hQxm-w",
+        "expire_date": "2021-07-04T18:26:33.591Z"
+    }
+},
+{
+    "model": "gur.customuser",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$216000$QPIiyreAovpg$5k1Qnby8fgz5ptq9psSMiAUys28gqrY0b2ZcaE6JwtM=",
+        "last_login": null,
+        "is_superuser": false,
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2021-06-20T18:25:09.533Z",
+        "email": "test@gmail.com",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "gur.customuser",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$216000$Rx8x7fTNbr9T$/OWP4SkdqOA9l18Ygs9NHdcWRh9+8crWJ6dajln7rfM=",
+        "last_login": "2021-06-20T18:26:33.577Z",
+        "is_superuser": true,
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2021-06-20T18:26:07.067Z",
+        "email": "admin@gmail.com",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "gur.customuser",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$216000$RbhFq83NalND$zGJaE5JvnuQPkZSH878dgMORBNsOrAN61wxal+AZ/zE=",
+        "last_login": null,
+        "is_superuser": false,
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2021-06-20T18:37:49.207Z",
+        "email": "courier@gmail.com",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "gur.courieraccount",
+    "pk": 1,
+    "fields": {
+        "user": 3,
+        "first_name": "",
+        "tel_num": ""
+    }
+},
+{
+    "model": "gur.useraccount",
+    "pk": 1,
+    "fields": {
+        "user": 1,
+        "first_name": "Igor",
+        "tel_num": "380957234141"
+    }
+},
+{
+    "model": "gur.useraccount",
+    "pk": 2,
+    "fields": {
+        "user": 2,
+        "first_name": "Admin_User",
+        "tel_num": "380757214124"
+    }
+},
+{
+    "model": "gur.useraccount",
+    "pk": 3,
+    "fields": {
+        "user": 3,
+        "first_name": "Courier",
+        "tel_num": "380573537252"
+    }
+},
+{
+    "model": "gur.restaurant",
+    "pk": 1,
+    "fields": {
+        "rest_photo": "https://ik.imagekit.io/alouh/Restaurants/PuzataHata/puzata_5h-ootFga8hy.jpg",
+        "rest_address": "Русанівська набережна, 10, Київ, Україна, 02000",
+        "name": "Пузата Хата",
+        "open_from": null,
+        "open_to": null,
+        "location": "SRID=4326;POINT (30.592258 50.4398341)"
+    }
+},
+{
+    "model": "gur.restaurant",
+    "pk": 2,
+    "fields": {
+        "rest_photo": "https://ik.imagekit.io/alouh/Restaurants/ElMolino/el_molino_bBLLMYCVHoGay.png",
+        "rest_address": "вулиця Євгена Сверстюка, 1, Київ, Україна, 43025",
+        "name": "El Molino",
+        "open_from": null,
+        "open_to": null,
+        "location": "SRID=4326;POINT (30.6001054 50.4519163)"
+    }
+},
+{
+    "model": "gur.restaurant",
+    "pk": 3,
+    "fields": {
+        "rest_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
+        "rest_address": "3A, вулиця Юрія Шумського, 3А, Київ, Україна, 02000",
+        "name": "Банка бар",
+        "open_from": null,
+        "open_to": null,
+        "location": "SRID=4326;POINT (30.6049073 50.4231001)"
+    }
+},
+{
+    "model": "gur.dish",
+    "pk": 1,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/PuzataHata/kotleta_8qTSJMyhG7Dz.jpg",
+        "restaurant_id": 1,
+        "name": "Котлета по-київськи",
+        "description": "Дуже смачна котлета",
+        "price": 7500,
+        "gramme": 180
+    }
+},
+{
+    "model": "gur.dish",
+    "pk": 2,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/PuzataHata/borsch_5HFXzPRDyYkL.jpg",
+        "restaurant_id": 1,
+        "name": "Борщ",
+        "description": "",
+        "price": 4500,
+        "gramme": 220
+    }
+},
+{
+    "model": "gur.dish",
+    "pk": 3,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/ElMolino/carbonara_XU2h8YAcU8a4.jpg",
+        "restaurant_id": 2,
+        "name": "Паста Карбонара",
+        "description": "",
+        "price": 18000,
+        "gramme": 310
+    }
+},
+{
+    "model": "gur.dish",
+    "pk": 4,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/ElMolino/Pasta_1523360590_CN1NqbsSf4f7.jpg",
+        "restaurant_id": 2,
+        "name": "Паста з м'ясом",
+        "description": "",
+        "price": 16000,
+        "gramme": 290
+    }
+},
+{
+    "model": "gur.dish",
+    "pk": 5,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/nalyvka_malyna_8fg9WqGHz_JZp.jpg",
+        "restaurant_id": 3,
+        "name": "Наливка \"Малина\"",
+        "description": "",
+        "price": 8000,
+        "gramme": 70
+    }
+},
+{
+    "model": "gur.dish",
+    "pk": 6,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/nalyvka_v5P0_-m8exhk.jpg",
+        "restaurant_id": 3,
+        "name": "Наливка \"Вишня\"",
+        "description": "Дуже смачна наливка",
+        "price": 6500,
+        "gramme": 85
+    }
+},
+{
+    "model": "gur.order",
+    "pk": 1,
+    "fields": {
+        "user_id": 1,
+        "courier_id": null,
+        "summary": 0,
+        "delivery_address": null,
+        "delivery_location": null,
+        "created_tm": "2021-06-20T18:25:34.516Z",
+        "order_details": null
+    }
+},
+{
+    "model": "gur.order",
+    "pk": 2,
+    "fields": {
+        "user_id": 2,
+        "courier_id": 1,
+        "summary": 16500,
+        "delivery_address": "вулиця Челябінська, Київ, Україна, 02000",
+        "delivery_location": "SRID=4326;POINT (30.5967171 50.4595135)",
+        "created_tm": "2021-06-20T18:26:59.797Z",
+        "order_details": ""
+    }
+},
+{
+    "model": "gur.order",
+    "pk": 3,
+    "fields": {
+        "user_id": 2,
+        "courier_id": 1,
+        "summary": 50000,
+        "delivery_address": "вулиця Челябінська, Київ, Україна, 02000",
+        "delivery_location": "SRID=4326;POINT (30.5967171 50.4595135)",
+        "created_tm": "2021-06-20T18:37:16.411Z",
+        "order_details": ""
+    }
+},
+{
+    "model": "gur.order",
+    "pk": 4,
+    "fields": {
+        "user_id": 2,
+        "courier_id": 1,
+        "summary": 15000,
+        "delivery_address": "вулиця Челябінська, Київ, Україна, 02000",
+        "delivery_location": "SRID=4326;POINT (30.5967171 50.4595135)",
+        "created_tm": "2021-06-20T18:37:26.488Z",
+        "order_details": ""
+    }
+},
+{
+    "model": "gur.order",
+    "pk": 5,
+    "fields": {
+        "user_id": 3,
+        "courier_id": null,
+        "summary": 0,
+        "delivery_address": null,
+        "delivery_location": null,
+        "created_tm": "2021-06-20T18:37:59.577Z",
+        "order_details": null
+    }
+},
+{
+    "model": "gur.order",
+    "pk": 6,
+    "fields": {
+        "user_id": 2,
+        "courier_id": null,
+        "summary": 0,
+        "delivery_address": null,
+        "delivery_location": null,
+        "created_tm": "2021-06-20T18:38:47.741Z",
+        "order_details": null
+    }
+},
+{
+    "model": "gur.orderdish",
+    "pk": 1,
+    "fields": {
+        "order_id": 2,
+        "dish_id": 1,
+        "quantity": 1
+    }
+},
+{
+    "model": "gur.orderdish",
+    "pk": 2,
+    "fields": {
+        "order_id": 2,
+        "dish_id": 2,
+        "quantity": 2
+    }
+},
+{
+    "model": "gur.orderdish",
+    "pk": 3,
+    "fields": {
+        "order_id": 3,
+        "dish_id": 3,
+        "quantity": 1
+    }
+},
+{
+    "model": "gur.orderdish",
+    "pk": 4,
+    "fields": {
+        "order_id": 3,
+        "dish_id": 4,
+        "quantity": 2
+    }
+},
+{
+    "model": "gur.orderdish",
+    "pk": 5,
+    "fields": {
+        "order_id": 4,
+        "dish_id": 1,
+        "quantity": 2
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 1,
+    "fields": {
+        "order_id": 1,
+        "status": "O",
+        "timestamp": "2021-06-20T18:25:34.556Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 2,
+    "fields": {
+        "order_id": 2,
+        "status": "O",
+        "timestamp": "2021-06-20T18:26:59.809Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 3,
+    "fields": {
+        "order_id": 2,
+        "status": "P",
+        "timestamp": "2021-06-20T18:37:09.774Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 4,
+    "fields": {
+        "order_id": 3,
+        "status": "O",
+        "timestamp": "2021-06-20T18:37:16.431Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 5,
+    "fields": {
+        "order_id": 3,
+        "status": "P",
+        "timestamp": "2021-06-20T18:37:20.961Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 6,
+    "fields": {
+        "order_id": 4,
+        "status": "O",
+        "timestamp": "2021-06-20T18:37:26.503Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 7,
+    "fields": {
+        "order_id": 4,
+        "status": "P",
+        "timestamp": "2021-06-20T18:37:30.585Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 8,
+    "fields": {
+        "order_id": 5,
+        "status": "O",
+        "timestamp": "2021-06-20T18:37:59.592Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 9,
+    "fields": {
+        "order_id": 2,
+        "status": "D",
+        "timestamp": "2021-06-20T18:38:29.052Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 10,
+    "fields": {
+        "order_id": 6,
+        "status": "O",
+        "timestamp": "2021-06-20T18:38:47.757Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 11,
+    "fields": {
+        "order_id": 2,
+        "status": "F",
+        "timestamp": "2021-06-20T18:39:02.518Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 12,
+    "fields": {
+        "order_id": 3,
+        "status": "D",
+        "timestamp": "2021-06-20T18:39:08.061Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 13,
+    "fields": {
+        "order_id": 3,
+        "status": "F",
+        "timestamp": "2021-06-20T18:39:26.947Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 14,
+    "fields": {
+        "order_id": 4,
+        "status": "D",
+        "timestamp": "2021-06-20T18:39:28.366Z"
+    }
+},
+{
+    "model": "gur.orderstatus",
+    "pk": 15,
+    "fields": {
+        "order_id": 4,
+        "status": "C",
+        "timestamp": "2021-06-20T18:39:29.479Z"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 1,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:38:35.192Z",
+        "location": "SRID=4326;POINT (30.561311 50.460569)"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 2,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:38:40.072Z",
+        "location": "SRID=4326;POINT (30.561311 50.460569)"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 3,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:38:45.099Z",
+        "location": "SRID=4326;POINT (30.561311 50.460569)"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 4,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:38:50.069Z",
+        "location": "SRID=4326;POINT (30.561311 50.460569)"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 5,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:38:54.210Z",
+        "location": "SRID=4326;POINT (30.561311 50.460569)"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 6,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:39:00.066Z",
+        "location": "SRID=4326;POINT (30.591311 50.460569)"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 7,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:39:14.099Z",
+        "location": "SRID=4326;POINT (30.591311 50.460569)"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 8,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:39:18.234Z",
+        "location": "SRID=4326;POINT (30.591311 50.460569)"
+    }
+},
+{
+    "model": "gur.courierlocation",
+    "pk": 9,
+    "fields": {
+        "courier": 1,
+        "date": "2021-06-20T18:39:24.061Z",
+        "location": "SRID=4326;POINT (30.597311 50.460569)"
+    }
+}
+]

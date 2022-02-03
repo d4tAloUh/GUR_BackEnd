@@ -1,0 +1,74 @@
+[
+{
+    "model": "gur.restaurant",
+    "pk": 1,
+    "fields": {
+        "rest_photo": "",
+        "rest_address": "Русанівська набережна, 24, Київ, 02000",
+        "name": "Абу",
+        "open_from": "09:00:00",
+        "open_to": "00:00:00",
+        "location": "SRID=4326;POINT (30.591165 50.44462699999998)"
+    }
+},
+{
+    "model": "gur.dish",
+    "pk": 1,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
+        "restaurant_id": 1,
+        "name": "Наливка \"Малина\"",
+        "description": "",
+        "price": 5600,
+        "gramme": 100
+    }
+},
+    {
+    "model": "gur.dish",
+    "pk": 2,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
+        "restaurant_id": 1,
+        "name": "Наливка \"Вишня\"",
+        "description": "Дуже смачна",
+        "price": 7400,
+        "gramme": 150
+    }
+},
+    {
+    "model": "gur.restaurant",
+    "pk": 2,
+    "fields": {
+        "rest_photo": "",
+        "rest_address": "Русанівська набережна, 12, Київ, 02000",
+        "name": "Абу2",
+        "open_from": "09:00:00",
+        "open_to": "00:00:00",
+        "location": "SRID=4326;POINT (29.251165 50.44462699999998)"
+    }
+},
+{
+    "model": "gur.dish",
+    "pk": 3,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
+        "restaurant_id": 2,
+        "name": "Наливка \"Лимон\"",
+        "description": "",
+        "price": 5600,
+        "gramme": 100
+    }
+},
+    {
+    "model": "gur.dish",
+    "pk": 4,
+    "fields": {
+        "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
+        "restaurant_id": 2,
+        "name": "Наливка \"Гранат\"",
+        "description": "Дуже смачна",
+        "price": 7400,
+        "gramme": 150
+    }
+}
+]
