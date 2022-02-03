@@ -7,14 +7,13 @@ from mongoengine import connect
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '9d5(o2*$p7tm_b1-_1t)9o@)l#oq7f*@zl0r16&fks&i!ar5^g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1','192.168.31.11:8000', '192.168.31.11']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.31.11:8000', '192.168.31.11']
 
 # Application definition
 
@@ -26,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
-    
+
     # 3rd party
     'rest_framework',
     'corsheaders',
@@ -135,3 +134,4 @@ CHANNEL_LAYERS = {
     }
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
