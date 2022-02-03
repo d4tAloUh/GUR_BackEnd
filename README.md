@@ -6,7 +6,12 @@
 ### Pre-requirements
 #### You have to install postgres 12.6 version
 #### You have to install postgis 3.1 version [windows installation](https://docs.djangoproject.com/en/3.2/ref/contrib/gis/install/#windows)
+#### Or you could use postgis docker image with command
+```bash
+docker run --name gur-postgis -e POSTGRES_PASSWORD=gur-postgis -d postgis/postgis -p 5432:5432
+```
 
+### Installation
 ```bash
 # install dependencies
 $ pip install -r requirements.txt
