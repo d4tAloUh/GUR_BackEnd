@@ -1,26 +1,26 @@
 from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 
-from api.gur.views.account import (
+from .views.account import (
     UserRegistrationApiView, UserAccountApiView,
     CourierAccountApiView
 )
-from api.gur.views.courier import (
+from .views.courier import (
     CourierLastOrderApiView, CourierFreeOrderApiView,
     CourierUpdateFreeOrderApiView, CourierLocationUpdateApiView,
     CourierOrderListApiView, CourierOrderApiView
 )
-from api.gur.views.dishes import (
+from .views.dishes import (
     DishApiView, DishExactApiView
 )
-from api.gur.views.order import (
+from .views.order import (
     OrderApiView, OrderCreationApiView,
     OrderSameCreationApiView, UserOrderListApiView,
     UserOrderApiView, OrderDishCreateApiView,
     OrderDishApiView, OrderDishClearApiView,
     OrderStatusApiView
 )
-from api.gur.views.restaurant import (
+from .views.restaurant import (
     RestaurantApiView, RestaurantAdminApiView
 )
 

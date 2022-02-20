@@ -1,4 +1,4 @@
-from api.gur.models import RestaurantAdmin, UserAccount
+from ..models import RestaurantAdmin, UserAccount
 
 
 def pass_test(request):
