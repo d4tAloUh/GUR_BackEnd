@@ -1,4 +1,7 @@
 from datetime import datetime
+
+from django.contrib.auth import get_user_model
+from django.contrib.gis.geos import GEOSGeometry
 from django.utils import timezone
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
@@ -48,13 +51,16 @@ class CustomUser(AbstractUser):
         return self.email
 
 
+User = get_user_model()
+
+
 class AccountInfo(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=70, blank=True, null=False)
     tel_num = models.CharField(max_length=12, blank=True, null=False,
                                validators=[RegexValidator(
                                    regex=r'^[0-9]*$',
-                                   message=_('Будь ласка, вкажіть валідний номер телефону.'))]
+                                   message=_('Будь ласка, вкажіть правильний номер телефону.'))]
                                )
 
     class Meta:
@@ -83,6 +89,17 @@ class UserAccount(AccountInfo):
         return f"{self.account_id} - {self.first_name}(+{self.tel_num})"
 
 
+class RestaurantManager(models.Manager):
+    def get_restaurants_to_position(self, longitude, latitude):
+        user_location = GEOSGeometry(
+            f'POINT({longitude} {latitude})',
+            srid=4326
+        )
+        return self.get_queryset().filter(
+            location__distance_lte=(user_location, settings.POSSIBLE_USER_DISTANCE)
+        )
+
+
 class Restaurant(models.Model):
     class Meta:
         verbose_name = "Restaurant"
@@ -95,6 +112,8 @@ class Restaurant(models.Model):
     open_from = models.TimeField(auto_now=False, null=True, blank=True)
     open_to = models.TimeField(auto_now=False, null=True, blank=True)
     location = gis_models.PointField(geography=True)
+
+    objects = RestaurantManager()
 
     def __str__(self):
         return f"{self.name}"
@@ -110,6 +129,13 @@ class Restaurant(models.Model):
         return True
 
 
+class RestaurantAdminManager(models.Manager):
+    def get_admin_restaurant_ids(self, user):
+        return self.get_queryset().filter(
+            user_id__user=user
+        ).values_list('rest_id', flat=True)
+
+
 class RestaurantAdmin(models.Model):
     class Meta:
         verbose_name = "Restaurant admin"
@@ -117,6 +143,7 @@ class RestaurantAdmin(models.Model):
 
     user_id = models.ForeignKey(UserAccount, on_delete=models.CASCADE, null=False)
     rest_id = models.ForeignKey(Restaurant, on_delete=models.CASCADE, null=False)
+    objects = RestaurantAdminManager()
 
     def __str__(self):
         return f"{self.user_id.first_name} : {self.rest_id.name}"
@@ -178,11 +205,20 @@ class OrderStatus(models.Model):
         unique_together = (('order_id', 'status'),)
         ordering = ('timestamp', 'order_id',)
 
-    status_enum = [("O", "Opened order"),
-                   ("P", "Preparing order"),
-                   ("D", "Delivering order"),
-                   ("C", "Canceled order"),
-                   ("F", "Delivered order")]
+    OPEN = "O"
+    PREPARING = "P"
+    DELIVERING = "D"
+    CANCELLED = "C"
+    DELIVERED = "F"
+    NON_OPEN_STATUSES = [PREPARING, DELIVERING, CANCELLED, DELIVERED]
+    FINISHED_STATUSES = [CANCELLED, DELIVERED]
+    COURIER_ORDER_STATUSES = [DELIVERING] + FINISHED_STATUSES
+
+    status_enum = [(OPEN, "Opened order"),
+                   (PREPARING, "Preparing order"),
+                   (DELIVERING, "Delivering order"),
+                   (CANCELLED, "Canceled order"),
+                   (DELIVERED, "Delivered order")]
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
     status = models.CharField(max_length=1, choices=status_enum)
     timestamp = models.DateTimeField(default=timezone.now)
