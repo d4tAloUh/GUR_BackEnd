@@ -9,6 +9,7 @@ from rest_framework_simplejwt.tokens import UntypedToken
 class BaseConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
+        print("Tried to connect")
         await self.accept()
 
     async def disconnect(self, code):
