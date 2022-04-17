@@ -87,7 +87,6 @@ class RestaurantViewTests(APITestCase):
                 'latitude': "50.4292357"
             }
         }, **self.admin_header, format='json')
-
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(response.data['rest_id'], 1, response.content)
 
@@ -103,7 +102,7 @@ class RestaurantViewTests(APITestCase):
             }
         }, **self.non_admin_header, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.content)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
 
     def test_update_restaurants_wrong_restaurant(self):
         url = reverse('restaurants-admin', kwargs={"pk": 1})
@@ -116,8 +115,8 @@ class RestaurantViewTests(APITestCase):
                 'latitude': "50.4292357"
             }
         }, **self.header, format='json')
+
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
-        self.assertEqual(response.data['error'], "Ви не можете змінити інший ресторан", response.data)
 
     def test_delete_not_existing_restaurant(self):
         url = reverse('restaurants-admin', kwargs={"pk": 31})
@@ -130,7 +129,7 @@ class RestaurantViewTests(APITestCase):
         url = reverse('restaurants-admin', kwargs={"pk": 1})
 
         response = self.client.delete(url, {}, **self.header, format='json')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.content)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
 
     def test_delete_restaurant_successfuly(self):
         url = reverse('restaurants-admin', kwargs={"pk": 1})

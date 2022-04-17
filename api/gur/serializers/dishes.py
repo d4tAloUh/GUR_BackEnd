@@ -5,7 +5,9 @@ from ..models import Dish
 class DishSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dish
-        fields = ['dish_id', 'restaurant_id', 'name', 'description', 'price', 'gramme', 'dish_photo']
+        fields = ['dish_id', 'restaurant_id',
+                  'name', 'description', 'price',
+                  'gramme', 'dish_photo']
         extra_kwargs = {
             'name': {'error_messages': {
                 'blank': 'Необхідно вказати назву страви.'}},
@@ -23,5 +25,7 @@ class DishInOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dish
-        fields = ['dish_id', 'restaurant_id', 'name', 'description', 'price', 'gramme', 'dish_photo', 'quantity']
+        fields = ['dish_id', 'restaurant_id', 'name',
+                  'description', 'price', 'gramme',
+                  'dish_photo', 'quantity']
         read_only_fields = ['quantity']

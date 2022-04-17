@@ -92,7 +92,7 @@ class OrderCreationApiView(UpdateAPIView):
             if not restaurant:
                 raise UserWarning("Ваше місце доставки знаходиться дуже далеко від ресторану")
 
-            if not restaurant[0].is_open():
+            if not restaurant[0].is_open:
                 raise UserWarning("Ресторан зачинений")
 
         except UserWarning as err:

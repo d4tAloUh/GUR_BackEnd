@@ -60,7 +60,7 @@ class RestaurantAdminApiView(UpdateAPIView, DestroyAPIView):
                 user_id__user=self.request.user,
                 rest_id=instance
             )
-            if not rest_admin.exists():
+            if not rest_admin.exists() and not self.request.user.is_superuser:
                 raise RestaurantAdmin.DoesNotExist
             serializer = self.get_serializer(instance, data=request.data)
             serializer.is_valid(raise_exception=True)

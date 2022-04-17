@@ -133,5 +133,5 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
-
+DJANGO_ALLOW_ASYNC_UNSAFE = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

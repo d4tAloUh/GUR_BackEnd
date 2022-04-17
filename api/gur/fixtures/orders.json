@@ -1,0 +1,141 @@
+[
+  {
+    "model": "gur.order",
+    "pk": 1,
+    "fields": {
+      "user_id": 1,
+      "courier_id": null,
+      "summary": 0,
+      "delivery_address": "вулиця Челябінська, Київ, Україна, 02000",
+      "delivery_location": "SRID=4326;POINT (30.5967171 50.4595135)",
+      "created_tm": "2021-06-05T13:27:24.149Z",
+      "order_details": ""
+    }
+  },
+  {
+    "model": "gur.orderstatus",
+    "pk": 1,
+    "fields": {
+      "order_id": 1,
+      "status": "O",
+      "timestamp": "2021-05-29T20:51:56.455Z"
+    }
+  },{
+    "model": "gur.orderstatus",
+    "pk": 2,
+    "fields": {
+      "order_id": 1,
+      "status": "P",
+      "timestamp": "2021-05-29T20:51:56.455Z"
+    }
+  },{
+    "model": "gur.orderstatus",
+    "pk": 3,
+    "fields": {
+      "order_id": 1,
+      "status": "D",
+      "timestamp": "2021-05-29T20:51:56.455Z"
+    }
+  },
+  {
+    "model": "gur.orderstatus",
+    "pk": 4,
+    "fields": {
+      "order_id": 1,
+      "status": "F",
+      "timestamp": "2021-05-29T20:51:56.455Z"
+    }
+  },
+  {
+    "model": "gur.order",
+    "pk": 2,
+    "fields": {
+      "user_id": 1,
+      "courier_id": null,
+      "summary": 0,
+      "delivery_address": null,
+      "delivery_location": null,
+      "created_tm": "2021-06-05T13:27:24.149Z",
+      "order_details": ""
+    }
+  },
+  {
+    "model": "gur.orderstatus",
+    "pk": 5,
+    "fields": {
+      "order_id": 2,
+      "status": "O",
+      "timestamp": "2021-05-29T20:51:56.455Z"
+    }
+  },
+  {
+    "model": "gur.order",
+    "pk": 3,
+    "fields": {
+      "user_id": 2,
+      "courier_id": null,
+      "summary": 0,
+      "delivery_address": null,
+      "delivery_location": null,
+      "created_tm": "2021-06-05T13:27:24.149Z",
+      "order_details": ""
+    }
+  },
+  {
+    "model": "gur.orderstatus",
+    "pk": 6,
+    "fields": {
+      "order_id": 3,
+      "status": "O",
+      "timestamp": "2021-05-29T20:51:56.455Z"
+    }
+  },
+    {
+    "model": "gur.customuser",
+    "pk": 1,
+    "fields": {
+      "password": "4124131",
+      "last_login": null,
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2021-06-08T13:03:13.205Z",
+      "email": "test@gmail.com",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+    {
+    "model": "gur.useraccount",
+    "pk": 1,
+    "fields": {
+      "user": 1,
+      "first_name": "Максим",
+      "tel_num": "38058384212"
+    }
+  },
+  {
+    "model": "gur.customuser",
+    "pk": 2,
+    "fields": {
+      "password": "5435356",
+      "last_login": null,
+      "is_superuser": false,
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2021-06-08T13:03:13.205Z",
+      "email": "test123@gmail.com",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+    {
+    "model": "gur.useraccount",
+    "pk": 2,
+    "fields": {
+      "user": 2,
+      "first_name": "Антон",
+      "tel_num": "6547474747"
+    }
+  }
+]
