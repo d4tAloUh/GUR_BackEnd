@@ -32,22 +32,24 @@ def order_is_available_to_add(order_id, dish_id, user_id=None):
     if order_is_not_open:
         raise UserWarning("Це замовлення неможливо змінити")
 
-    dishes_from_other_rest = Dish.objects.filter(orderdish__order_id__order_id=order_id) \
-        .values_list('restaurant_id__rest_id',
-                     flat=True) \
-        .exclude(restaurant_id__rest_id=Dish.objects.get(dish_id=dish_id).restaurant_id.rest_id)
+    dishes_from_other_rest = Dish.objects.filter(
+        orderdish__order_id__order_id=order_id
+    ).values_list(
+        'restaurant_id__rest_id', flat=True
+    ).exclude(restaurant_id__rest_id=Dish.objects.get(dish_id=dish_id).restaurant_id.rest_id)
 
     if dishes_from_other_rest.exists():
         raise UserWarning("Ви не можете робити замовлення від декількох ресторанів")
 
 
 def get_order_or_create(user_id: int):
+    user_account = UserAccount.objects.get(user_id=user_id)
     not_open_orders = OrderStatus.objects.filter(
-        order_id__user_id__account_id=UserAccount.objects.get(user_id=user_id).account_id).exclude(status="O") \
-        .values_list("order_id")
+        order_id__user_id=user_account
+    ).exclude(status="O").values_list("order_id")
     opened_orders = OrderStatus.objects.filter(
-        order_id__user_id__account_id=UserAccount.objects.get(user_id=user_id).account_id, status="O") \
-        .exclude(order_id__in=not_open_orders).values("order_id")
+        order_id__user_id=user_account, status="O"
+    ).exclude(order_id__in=not_open_orders).values("order_id")
 
     # There is an open order by user
     if opened_orders.exists():

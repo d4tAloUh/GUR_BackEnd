@@ -169,8 +169,10 @@ class OrderDishApiView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return OrderDish.objects.get(order_id__order_id=self.kwargs.get("order_pk"),
-                                     dish_id__dish_id=self.request.data["dish_id"])
+        return OrderDish.objects.get(
+            order_id__order_id=self.kwargs.get("order_pk"),
+            dish_id__dish_id=self.request.data["dish_id"]
+        )
 
     def update(self, request, *args, **kwargs):
         try:
