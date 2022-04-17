@@ -45,3 +45,10 @@ qwe123
 courier@gmail.com
 qwe123
 ```
+
+### Frequently asked questions
+
+#### The sockets returns `rejected`
+```bash
+Probably the host does not match the allowed hosts in settings (check that front is running on localhost or 127.0.0.1)
+```
