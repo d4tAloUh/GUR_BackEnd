@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'channels',
+
     # main app
     'gur.apps.GurConfig'
 ]

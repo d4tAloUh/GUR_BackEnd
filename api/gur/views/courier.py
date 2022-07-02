@@ -89,7 +89,7 @@ class CourierUpdateFreeOrderApiView(UpdateAPIView):
                     'type': 'event.orderstatus',
                     'content': json.dumps({
                         "status": order_status.status,
-                        "timestamp": datetime.fromtimestamp(order_status.timestamp.timestamp()).strftime(
+                        "timestamp": datetime.fromtimestamp(order_status.created_at.created_at()).strftime(
                             '%Y-%m-%d %H:%M:%S')
                     }, indent=4, default=str)
                 })

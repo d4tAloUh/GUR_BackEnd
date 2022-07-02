@@ -48,7 +48,7 @@ class OrderWithFirstStatusSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['created_tm'] = datetime.fromtimestamp(
-            instance.created_tm.timestamp()
+            instance.created_tm.created_at()
         ).strftime('%Y-%m-%d %H:%M:%S')
         return rep
 
@@ -96,7 +96,7 @@ class OrderWithStatusSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['created_tm'] = datetime.fromtimestamp(
-            instance.created_tm.timestamp()
+            instance.created_tm.created_at()
         ).strftime('%Y-%m-%d %H:%M:%S')
         return rep
 
@@ -109,7 +109,7 @@ class OrderStatusSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['timestamp'] = datetime.fromtimestamp(
-            instance.timestamp.timestamp()
+            instance.created_at.created_at()
         ).strftime('%Y-%m-%d %H:%M:%S')
         return rep
 
@@ -161,7 +161,7 @@ class CourierOrderWithStatusSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['created_tm'] = datetime.fromtimestamp(
-            instance.created_tm.timestamp()
+            instance.created_tm.created_at()
         ).strftime('%Y-%m-%d %H:%M:%S')
         return rep
 

@@ -3,12 +3,12 @@
     "model": "gur.order",
     "pk": 1,
     "fields": {
-      "user_id": 1,
-      "courier_id": 1,
+      "user": 1,
+      "courier": 1,
       "summary": 5600,
       "delivery_address": "вулиця Челябінська, Київ, Україна, 02000",
       "delivery_location": "SRID=4326;POINT (30.5967171 50.45951349999998)",
-      "created_tm": "2021-05-29T20:51:56Z",
+      "created_at": "2021-05-29T20:51:56Z",
       "order_details": null
     }
   },
@@ -16,12 +16,12 @@
     "model": "gur.order",
     "pk": 2,
     "fields": {
-      "user_id": 1,
-      "courier_id": null,
+      "user": 1,
+      "courier": null,
       "summary": 5600,
       "delivery_address": "вулиця Челябінська, Київ, Україна, 02000",
       "delivery_location": "SRID=4326;POINT (30.5967171 50.45951349999998)",
-      "created_tm": "2021-06-01T09:41:16Z",
+      "created_at": "2021-06-01T09:41:16Z",
       "order_details": null
     }
   },
@@ -29,12 +29,12 @@
     "model": "gur.order",
     "pk": 3,
     "fields": {
-      "user_id": 1,
-      "courier_id": null,
+      "user": 1,
+      "courier": null,
       "summary": 5600,
       "delivery_address": "вулиця Челябінська, Київ, Україна, 02000",
       "delivery_location": "SRID=4326;POINT (30.5967171 50.4595135)",
-      "created_tm": "2021-06-05T13:27:24.149Z",
+      "created_at": "2021-06-05T13:27:24.149Z",
       "order_details": ""
     }
   },
@@ -42,7 +42,7 @@
     "model": "gur.orderstatus",
     "pk": 4,
     "fields": {
-      "order_id": 1,
+      "order": 1,
       "status": "O",
       "timestamp": "2021-05-29T20:51:56.455Z"
     }
@@ -51,7 +51,7 @@
     "model": "gur.orderstatus",
     "pk": 5,
     "fields": {
-      "order_id": 1,
+      "order": 1,
       "status": "P",
       "timestamp": "2021-05-29T20:52:19.041Z"
     }
@@ -60,7 +60,7 @@
     "model": "gur.orderstatus",
     "pk": 6,
     "fields": {
-      "order_id": 2,
+      "order": 2,
       "status": "O",
       "timestamp": "2021-06-01T09:41:16.151Z"
     }
@@ -69,7 +69,7 @@
     "model": "gur.orderstatus",
     "pk": 7,
     "fields": {
-      "order_id": 1,
+      "order": 1,
       "status": "D",
       "timestamp": "2021-06-01T13:56:11Z"
     }
@@ -78,7 +78,7 @@
     "model": "gur.orderstatus",
     "pk": 8,
     "fields": {
-      "order_id": 2,
+      "order": 2,
       "status": "P",
       "timestamp": "2021-06-02T12:04:20.583Z"
     }
@@ -87,7 +87,7 @@
     "model": "gur.orderstatus",
     "pk": 41,
     "fields": {
-      "order_id": 3,
+      "order": 3,
       "status": "O",
       "timestamp": "2021-06-05T13:27:24.160Z"
     }
@@ -96,7 +96,7 @@
     "model": "gur.orderstatus",
     "pk": 42,
     "fields": {
-      "order_id": 3,
+      "order": 3,
       "status": "P",
       "timestamp": "2021-06-05T13:27:35.445Z"
     }

@@ -3,12 +3,12 @@
     "model": "gur.order",
     "pk": 1,
     "fields": {
-      "user_id": 1,
-      "courier_id": null,
+      "user": 1,
+      "courier": null,
       "summary": 0,
       "delivery_address": "вулиця Челябінська, Київ, Україна, 02000",
       "delivery_location": "SRID=4326;POINT (30.5967171 50.4595135)",
-      "created_tm": "2021-06-05T13:27:24.149Z",
+      "created_at": "2021-06-05T13:27:24.149Z",
       "order_details": ""
     }
   },
@@ -16,46 +16,46 @@
     "model": "gur.orderstatus",
     "pk": 1,
     "fields": {
-      "order_id": 1,
+      "order": 1,
       "status": "O",
-      "timestamp": "2021-05-29T20:51:56.455Z"
+      "created_at": "2021-05-29T20:51:56.455Z"
     }
   },{
     "model": "gur.orderstatus",
     "pk": 2,
     "fields": {
-      "order_id": 1,
+      "order": 1,
       "status": "P",
-      "timestamp": "2021-05-29T20:51:56.455Z"
+      "created_at": "2021-05-29T20:51:56.455Z"
     }
   },{
     "model": "gur.orderstatus",
     "pk": 3,
     "fields": {
-      "order_id": 1,
+      "order": 1,
       "status": "D",
-      "timestamp": "2021-05-29T20:51:56.455Z"
+      "created_at": "2021-05-29T20:51:56.455Z"
     }
   },
   {
     "model": "gur.orderstatus",
     "pk": 4,
     "fields": {
-      "order_id": 1,
+      "order": 1,
       "status": "F",
-      "timestamp": "2021-05-29T20:51:56.455Z"
+      "created_at": "2021-05-29T20:51:56.455Z"
     }
   },
   {
     "model": "gur.order",
     "pk": 2,
     "fields": {
-      "user_id": 1,
-      "courier_id": null,
+      "user": 1,
+      "courier": null,
       "summary": 0,
       "delivery_address": null,
       "delivery_location": null,
-      "created_tm": "2021-06-05T13:27:24.149Z",
+      "created_at": "2021-06-05T13:27:24.149Z",
       "order_details": ""
     }
   },
@@ -63,21 +63,21 @@
     "model": "gur.orderstatus",
     "pk": 5,
     "fields": {
-      "order_id": 2,
+      "order": 2,
       "status": "O",
-      "timestamp": "2021-05-29T20:51:56.455Z"
+      "created_at": "2021-05-29T20:51:56.455Z"
     }
   },
   {
     "model": "gur.order",
     "pk": 3,
     "fields": {
-      "user_id": 2,
-      "courier_id": null,
+      "user": 2,
+      "courier": null,
       "summary": 0,
       "delivery_address": null,
       "delivery_location": null,
-      "created_tm": "2021-06-05T13:27:24.149Z",
+      "created_at": "2021-06-05T13:27:24.149Z",
       "order_details": ""
     }
   },
@@ -85,9 +85,9 @@
     "model": "gur.orderstatus",
     "pk": 6,
     "fields": {
-      "order_id": 3,
+      "order": 3,
       "status": "O",
-      "timestamp": "2021-05-29T20:51:56.455Z"
+      "created_at": "2021-05-29T20:51:56.455Z"
     }
   },
     {

@@ -16,7 +16,7 @@
     "pk": 1,
     "fields": {
         "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
-        "restaurant_id": 1,
+        "restaurant": 1,
         "name": "Наливка \"Малина\"",
         "description": "",
         "price": 5600,
@@ -28,7 +28,7 @@
     "pk": 2,
     "fields": {
         "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
-        "restaurant_id": 1,
+        "restaurant": 1,
         "name": "Наливка \"Вишня\"",
         "description": "Дуже смачна",
         "price": 7400,
@@ -52,7 +52,7 @@
     "pk": 3,
     "fields": {
         "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
-        "restaurant_id": 2,
+        "restaurant": 2,
         "name": "Наливка \"Лимон\"",
         "description": "",
         "price": 5600,
@@ -64,7 +64,7 @@
     "pk": 4,
     "fields": {
         "dish_photo": "https://ik.imagekit.io/alouh/Restaurants/BankaBar/banka__Tqb8LtHK1xh.jpg",
-        "restaurant_id": 2,
+        "restaurant": 2,
         "name": "Наливка \"Гранат\"",
         "description": "Дуже смачна",
         "price": 7400,

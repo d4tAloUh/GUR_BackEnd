@@ -9,7 +9,7 @@ class CourierConsumer(BaseConsumer):
 
     @database_sync_to_async
     def should_accept_connection(self, user_id):
-        return CourierAccount.objects.filter(user_id=user_id).exists()
+        return CourierAccount.objects.filter(id=user_id).exists()
 
     async def receive_json(self, content, **kwargs):
         command = content.get("command")
