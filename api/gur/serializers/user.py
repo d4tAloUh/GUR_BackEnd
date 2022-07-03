@@ -10,18 +10,14 @@ class UserAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
         fields = ['first_name', 'tel_num', 'admin', 'partial_admin']
-        extra_kwargs = {
-            'first_name': {'error_messages': {
-                'blank': 'Необхідно вказати ім`я.'}},
-            'tel_num': {'error_messages': {
-                'blank': 'Необхідно вказати номер телефону.'}}
-        }
 
     def get_admin(self, instance):
         return instance.user.is_superuser
 
     def get_partial_admin(self, instance):
-        return RestaurantAdmin.objects.filter(user_id__user_id=instance.user.id).exists()
+        return RestaurantAdmin.objects.filter(
+            user__user=instance.user.id
+        ).exists()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -62,12 +58,6 @@ class CourierAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourierAccount
         fields = ['first_name', 'tel_num', 'is_courier']
-        extra_kwargs = {
-            'first_name': {'error_messages': {
-                'blank': 'Необхідно вказати ім`я.'}},
-            'tel_num': {'error_messages': {
-                'blank': 'Необхідно вказати номер телефону.'}}
-        }
 
 
 class UserForCourierAccountSerializer(serializers.ModelSerializer):

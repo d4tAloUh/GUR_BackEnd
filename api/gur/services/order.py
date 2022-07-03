@@ -2,8 +2,9 @@ import datetime
 import json
 
 from django.db import transaction
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Prefetch
 from django.http import Http404
+from rest_framework.exceptions import ValidationError
 
 from ..models import Order, OrderStatus, UserAccount, OrderDish, Dish
 from asgiref.sync import async_to_sync
@@ -30,7 +31,7 @@ def order_is_available_to_add(order_id, dish_id, user_id=None):
     if user_id is not None and current_order.user_id.account_id != UserAccount.objects.get(user_id=user_id).account_id:
         raise Http404
     if order_is_not_open:
-        raise UserWarning("Це замовлення неможливо змінити")
+        raise ValidationError("This order cannot be updated")
 
     dishes_from_other_rest = Dish.objects.filter(
         orderdish__order_id__order_id=order_id
@@ -39,21 +40,29 @@ def order_is_available_to_add(order_id, dish_id, user_id=None):
     ).exclude(restaurant_id__rest_id=Dish.objects.get(dish_id=dish_id).restaurant_id.rest_id)
 
     if dishes_from_other_rest.exists():
-        raise UserWarning("Ви не можете робити замовлення від декількох ресторанів")
+        raise ValidationError("You can't create order from different restaurants")
 
 
 def get_order_or_create(user_id: int):
-    user_account = UserAccount.objects.get(user_id=user_id)
     not_open_orders = OrderStatus.objects.filter(
-        order_id__user_id=user_account
-    ).exclude(status="O").values_list("order_id")
-    opened_orders = OrderStatus.objects.filter(
-        order_id__user_id=user_account, status="O"
-    ).exclude(order_id__in=not_open_orders).values("order_id")
+        order__user__user__id=user_id
+    ).exclude(status="O")
+
+    open_orders = OrderStatus.objects.filter(
+        order__user__user__id=user_id, status="O"
+    ).exclude(order__in=not_open_orders).values("order")
 
     # There is an open order by user
-    if opened_orders.exists():
-        return Order.objects.get(order_id=opened_orders[0]['order_id']), False
+    if open_orders.exists():
+        return Order.objects.prefetch_related(
+            Prefetch(
+                "order_dishes__dish",
+                queryset=Dish.objects.annotate(
+                    quantity=F('orderdish__quantity')
+                ),
+                to_attr="dishes"
+            ),
+        ).get(order_id=open_orders[0]['order']), False
 
     else:
         new_order = Order()
@@ -70,18 +79,10 @@ def get_order_summary(order_id):
     ).annotate(
         result=F('dish_id__price') * F('quantity')
     ).aggregate(Sum('result'))
-
+    # TODO: change to CASE
     if len(dishes_cost) and dishes_cost['result__sum'] is not None:
         summary = dishes_cost['result__sum']
     else:
         summary = 0
 
     return summary
-
-
-def get_dishes_in_order_with_quantity(order_id):
-    return Dish.objects.filter(
-        orderdish__order_id__order_id=order_id
-    ).annotate(
-        quantity=F('orderdish__quantity')
-    )

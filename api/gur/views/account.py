@@ -8,8 +8,9 @@ from ..models import (
     UserAccount,
     CourierAccount
 )
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
-
+from rest_framework.generics import (
+    RetrieveUpdateAPIView, CreateAPIView
+)
 from rest_framework.permissions import IsAuthenticated
 
 User = get_user_model()
@@ -21,7 +22,11 @@ class UserAccountApiView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        instance, _ = UserAccount.objects.get_or_create(user=self.request.user)
+        instance, _ = UserAccount.objects.select_related(
+            "user_account"
+        ).get_or_create(
+            user=self.request.user
+        )
         return instance
 
 
@@ -31,7 +36,9 @@ class CourierAccountApiView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        instance, _ = CourierAccount.objects.get_or_create(user=self.request.user)
+        instance, _ = CourierAccount.objects.get_or_create(
+            user=self.request.user
+        )
         return instance
 
 

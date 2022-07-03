@@ -1,113 +1,58 @@
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 
 from rest_framework.generics import (
     ListAPIView, CreateAPIView, DestroyAPIView,
     UpdateAPIView, RetrieveAPIView
 )
-from rest_framework.permissions import IsAuthenticated
-
 from ..models import (
-    Dish, Restaurant, RestaurantAdmin
+    Dish, RestaurantAdmin
 )
+from ..permissions import PermissionsRequired
 from ..serializers.dishes import (
     DishSerializer
 )
-from ..serializers.restaurant import RestaurantSerializer
-from ..services.common import pass_test as restaurant_admin_pass_test
 
 
 class DishApiView(ListAPIView, CreateAPIView):
     queryset = Dish.objects.all()
     serializer_class = DishSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [PermissionsRequired]
+    permissions_post = ["gur.add_dish"]
 
-    def list(self, request, *args, **kwargs):
-        try:
-            restaurant = Restaurant.objects.get(rest_id=self.kwargs.get('pk'))
-            dishes = Dish.objects.filter(restaurant_id=restaurant)
-            dish_serializer = DishSerializer(dishes, many=True)
-            rest_serializer = RestaurantSerializer(restaurant)
-            return Response({"dishes": dish_serializer.data,
-                             "restaurant": rest_serializer.data}, status=200)
-        except Restaurant.DoesNotExist:
-            return Response({"error": "Такого ресторану не існує"}, status=status.HTTP_404_NOT_FOUND)
-
-    def create(self, request, *args, **kwargs):
-        if not restaurant_admin_pass_test(self.request):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        admin_rest_ids = RestaurantAdmin.objects.get_admin_restaurant_ids(
-            user=self.request.user
+    def get_queryset(self):
+        return Dish.objects.filter(
+            restaurant__id=self.kwargs.get('pk')
         )
 
-        if not self.request.user.is_superuser and \
-                serializer.validated_data["restaurant_id"].rest_id not in admin_rest_ids:
-            return Response(
-                {"error": "Ви не можете створити страви для іншого ресторану"},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def perform_create(self, serializer):
+        if not self.request.user.is_superuser or not RestaurantAdmin.objects.filter(
+                rest__id=self.kwargs.get('pk'),
+                user_account__user=self.request.user
+        ).exists():
+            raise PermissionDenied("You cannot create dishes of this restaurant")
+        serializer.save()
 
 
 class DishExactApiView(RetrieveAPIView, DestroyAPIView, UpdateAPIView):
     queryset = Dish.objects.all()
     serializer_class = DishSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [PermissionsRequired]
+    permissions_put = ["gur.change_dish"]
+    permissions_patch = permissions_put
+    permissions_delete = ["gur.delete_dish"]
 
-    def retrieve(self, request, *args, **kwargs):
-        if not restaurant_admin_pass_test(self.request):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        try:
-            instance = Dish.objects.get(dish_id=self.kwargs.get('pk'))
-            serializer = self.get_serializer(instance)
-            return Response({"dish": serializer.data})
-        except Dish.DoesNotExist:
-            return Response({"error": "Такої страви не існує"}, status=status.HTTP_404_NOT_FOUND)
+    def perform_destroy(self, instance):
+        if not self.request.user.is_superuser or not RestaurantAdmin.objects.filter(
+                rest__dishes=instance,
+                user_account__user=self.request.user
+        ).exists():
+            raise PermissionDenied("You cannot delete dishes of this restaurant")
+        instance.delete()
 
-    def destroy(self, request, *args, **kwargs):
-        if not restaurant_admin_pass_test(self.request):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        dish_id = self.kwargs.get('pk', None)
-        if dish_id is None:
-            return Response({"error": "Страва має бути вказана"}, status=status.HTTP_400_BAD_REQUEST)
-        admin_rest_ids = RestaurantAdmin.objects.get_admin_restaurant_ids(
-            user=self.request.user
-        )
-        try:
-            instance = Dish.objects.get(dish_id=dish_id)
-            if not self.request.user.is_superuser and instance.restaurant_id.rest_id not in admin_rest_ids:
-                return Response({"error": "Ви не можете видалити страви іншого ресторану"},
-                                status=status.HTTP_403_FORBIDDEN)
-            self.perform_destroy(instance)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Dish.DoesNotExist:
-            return Response({"error": "Такої страви не існує"}, status=status.HTTP_404_NOT_FOUND)
-
-    def update(self, request, *args, **kwargs):
-        if not restaurant_admin_pass_test(self.request):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        dish_id = self.kwargs.get('pk', None)
-        if dish_id is None:
-            return Response({"error": "Страва має бути вказана"}, status=status.HTTP_400_BAD_REQUEST)
-        admin_rest_ids = RestaurantAdmin.objects.get_admin_restaurant_ids(
-            user=self.request.user
-        )
-        try:
-            instance = Dish.objects.get(dish_id=dish_id)
-
-            if not self.request.user.is_superuser and instance.restaurant_id.rest_id not in admin_rest_ids:
-                return Response({"error": "Ви не можете змінити страви іншого ресторану"},
-                                status=status.HTTP_403_FORBIDDEN)
-            request.data["restaurant_id"] = instance.restaurant_id.rest_id
-            serializer = self.get_serializer(instance, data=request.data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_update(serializer)
-            return Response(serializer.data)
-        except Dish.DoesNotExist:
-
-            return Response({"error": "Такої страви не існує"}, status=status.HTTP_404_NOT_FOUND)
+    def perform_update(self, serializer):
+        if not self.request.user.is_superuser or not RestaurantAdmin.objects.filter(
+                rest__dishes=serializer.instance,
+                user_account__user=self.request.user
+        ).exists():
+            raise PermissionDenied("You cannot change dishes of this restaurant")
+        serializer.save()
