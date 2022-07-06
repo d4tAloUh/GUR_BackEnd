@@ -1,5 +1,7 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.db.transaction import atomic
+from django.utils.functional import cached_property
 from rest_framework import status
 from django.db.models import F, Q, Prefetch, Exists, OuterRef
 from rest_framework.exceptions import ValidationError
@@ -8,26 +10,24 @@ from rest_framework.response import Response
 
 from rest_framework.generics import (
     ListAPIView, CreateAPIView, DestroyAPIView,
-    RetrieveUpdateDestroyAPIView, RetrieveAPIView, UpdateAPIView
+    RetrieveUpdateDestroyAPIView, RetrieveAPIView, UpdateAPIView, get_object_or_404
 )
 
-from ..serializers.dishes import DishInOrderSerializer
 from ..serializers.order import (
     OrderSerializer, OrderRetrieveSerializer,
-    CourierOrderDetailWithStatusSerializer,
+    CourierOrderDetailSerializer,
     OrderDishSerializer, OrderStatusSerializer, OrderWithFirstStatusSerializer,
     OrderWithStatusSerializer,
-    OrderDishWithOrderIdSerializer
+    OrderDishWithOrderIdSerializer, OrderRecreationDetailSerializer
 )
 from rest_framework.permissions import IsAuthenticated
 
 from ..models import (
     Order, Dish, OrderStatus,
-    OrderDish, Restaurant, CourierAccount
+    OrderDish, CourierAccount
 )
 from ..services.order import (
-    send_order_status_update, get_order_or_create,
-    order_is_available_to_add, get_order_summary
+    send_order_status_update, get_order_or_create
 )
 
 
@@ -48,32 +48,38 @@ class OrderCreationApiView(UpdateAPIView):
     def get_queryset(self):
         return Order.objects.filter(
             user__user=self.request.user
-        ).exclude(~Q(statuses__status=OrderStatus.OPEN)).prefetch_related(
+        ).exclude(
+            Exists(
+                OrderStatus.objects.filter(
+                    ~Q(status=OrderStatus.OPEN),
+                    order=OuterRef("pk"),
+                )
+            ),
+        ).prefetch_related(
             Prefetch(
-                "order_dishes__dish",
-                queryset=Dish.objects.annotate(
-                    quantity=F('orderdish__quantity')
-                ),
-                to_attr="dishes"
+                "order_dishes",
+                queryset=OrderDish.objects.select_related(
+                    "dish"
+                )
             ),
         )
 
     def perform_update(self, serializer):
-        serializer.save()
+        instance = serializer.save()
         # send this order to all connected couriers
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             f"courier_queue",
             {
                 'type': 'event.neworder',
-                'content': CourierOrderDetailWithStatusSerializer(
-                    serializer.instance
+                'content': CourierOrderDetailSerializer(
+                    instance
                 ).data
             })
 
 
 class OrderRecreationApiView(CreateAPIView):
-    serializer_class = OrderRetrieveSerializer
+    serializer_class = OrderRecreationDetailSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -81,9 +87,10 @@ class OrderRecreationApiView(CreateAPIView):
             user__user=self.request.user
         )
 
+    @atomic
     def create(self, request, *args, **kwargs):
         prev_order = self.get_object()
-        order, created = get_order_or_create(request.user.id)
+        order, _ = get_order_or_create(user_id=request.user.id)
         if order == prev_order:
             raise ValidationError("You cannot recreate order from the current")
 
@@ -100,14 +107,14 @@ class OrderRecreationApiView(CreateAPIView):
         for ordered_dish in order_dishes:
             order_dishes_to_create.append(
                 OrderDish(
-                    order_id=order,
+                    order=order,
                     quantity=ordered_dish.quantity,
-                    dish_id=ordered_dish.dish_id
+                    dish=ordered_dish.dish
                 )
             )
         OrderDish.objects.bulk_create(order_dishes_to_create)
         serializer = self.get_serializer(order)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class OrderDishApiView(RetrieveUpdateDestroyAPIView):
@@ -115,9 +122,10 @@ class OrderDishApiView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return OrderDish.objects.get(
-            order__id=self.kwargs.get("order_pk"),
-            dish__id=self.request.data["dish_id"]
+        return get_object_or_404(
+            OrderDish.objects.all(),
+            order__id=self.kwargs.get("pk"),
+            dish__id=self.request.data.get("dish")
         )
 
     def destroy(self, request, *args, **kwargs):
@@ -151,10 +159,11 @@ class OrderDishClearApiView(DestroyAPIView):
             )
         )
 
+    @atomic
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.is_not_updatable:
-            raise UserWarning("This order cannot be updated")
+            raise ValidationError("This order cannot be updated")
         OrderDish.objects.filter(order=instance).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -165,41 +174,20 @@ class OrderStatusApiView(CreateAPIView, ListAPIView):
 
     def get_queryset(self):
         return OrderStatus.objects.filter(
-            order__id=self.kwargs['order_id'],
-            order__user__user=self.request.user
+            order=self.order
         )
 
-    def create(self, request, *args, **kwargs):
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.validated_data['order_id'] = Order.objects.get(order_id=self.kwargs.get('pk'))
-            if serializer.validated_data["order_id"].courier_id == CourierAccount.objects.get(user=request.user):
-                if serializer.validated_data['status'] == OrderStatus.CANCELLED:
-                    if OrderStatus.objects.filter(
-                            order_id=serializer.validated_data["order_id"],
-                            status=OrderStatus.DELIVERED
-                    ).exists():
-                        raise UserWarning("Це замовлення вже доставлене")
-                elif serializer.validated_data['status'] == OrderStatus.DELIVERED:
-                    if OrderStatus.objects.filter(
-                            order_id=serializer.validated_data["order_id"],
-                            status=OrderStatus.CANCELLED
-                    ).exists():
-                        raise UserWarning("Це замовлення вже скасоване")
-                else:
-                    raise UserWarning("Ви не можете робити цю дію")
-            # do not allow changing order status
-            elif not request.user.is_superuser:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            order_status = serializer.save()
-            send_order_status_update(order_status)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-        except UserWarning as err:
-            return Response({"error": str(err)}, status=status.HTTP_400_BAD_REQUEST)
-        except CourierAccount.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    @cached_property
+    def order(self):
+        query = Order.objects.select_related(
+            "courier"
+        ).prefetch_related("statuses")
+        return get_object_or_404(query, id=self.kwargs['order_id'])
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["order"] = self.order
+        return context
 
 
 class UserOrderListApiView(ListAPIView):
@@ -208,10 +196,13 @@ class UserOrderListApiView(ListAPIView):
 
     def get_queryset(self):
         return Order.objects.filter(
+            Exists(
+                OrderStatus.objects.filter(
+                    order=OuterRef("pk")
+                ).exclude(status=OrderStatus.OPEN)
+            ),
             user_id__user=self.request.user
-        ).exclude(
-            statuses__status=OrderStatus.OPEN
-        ).distinct().order_by('-created_tm')
+        ).distinct().order_by('-created_at')
 
 
 class UserOrderApiView(RetrieveAPIView):
@@ -223,11 +214,10 @@ class UserOrderApiView(RetrieveAPIView):
             user__user=self.request.user
         ).prefetch_related(
             Prefetch(
-                "order_dishes__dish",
-                queryset=Dish.objects.annotate(
-                    quantity=F('orderdish__quantity')
-                ),
-                to_attr="dishes"
+                "order_dishes",
+                queryset=OrderDish.objects.select_related(
+                    "dish"
+                )
             ),
             "statuses"
         )

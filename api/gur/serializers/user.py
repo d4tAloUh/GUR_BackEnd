@@ -15,9 +15,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
         return instance.user.is_superuser
 
     def get_partial_admin(self, instance):
-        return RestaurantAdmin.objects.filter(
-            user__user=instance.user.id
-        ).exists()
+        return instance.restaurant_admins.exists()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -30,12 +28,12 @@ class UserSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'password': {'write_only': True, 'error_messages': {
-                                                'blank': 'Необхідно вказати пароль.',
-                                                'invalid': 'Неправильно вказаний пароль.'}},
+                'blank': 'Необхідно вказати пароль.',
+                'invalid': 'Неправильно вказаний пароль.'}},
             'email': {'error_messages': {
-                        'blank': 'Необхідно вказати емейл.',
-                        'unique': 'Користувач з таким емейлом уже існує.',
-                        'invalid': 'Будь ласка, вкажіть валідний емейл.'}}
+                'blank': 'Необхідно вказати емейл.',
+                'unique': 'Користувач з таким емейлом уже існує.',
+                'invalid': 'Будь ласка, вкажіть валідний емейл.'}}
         }
 
     def create(self, validated_data):
@@ -50,18 +48,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CourierAccountSerializer(serializers.ModelSerializer):
-    is_courier = serializers.SerializerMethodField()
-
-    def get_is_courier(self, instance):
-        return True
-
     class Meta:
         model = CourierAccount
-        fields = ['first_name', 'tel_num', 'is_courier']
+        fields = ['first_name', 'tel_num']
 
 
 class UserForCourierAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
         fields = ['first_name', 'tel_num']
-        read_only_fields = ['first_name', 'tel_num']

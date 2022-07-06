@@ -17,21 +17,19 @@ User = get_user_model()
 
 
 class UserAccountApiView(RetrieveUpdateAPIView):
-    queryset = UserAccount.objects.all()
     serializer_class = UserAccountSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         instance, _ = UserAccount.objects.select_related(
-            "user_account"
-        ).get_or_create(
+            "user"
+        ).prefetch_related("restaurant_admins").get_or_create(
             user=self.request.user
         )
         return instance
 
 
 class CourierAccountApiView(RetrieveUpdateAPIView):
-    queryset = CourierAccount.objects.all()
     serializer_class = CourierAccountSerializer
     permission_classes = [IsAuthenticated]
 

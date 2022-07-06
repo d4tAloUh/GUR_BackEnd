@@ -5,9 +5,9 @@ from django.db.transaction import atomic
 from rest_framework import serializers
 from datetime import datetime
 
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
-from .dishes import DishInOrderSerializer
+from .dishes import DishInOrderSerializer, OrderedDishSerializer
 from .user import UserForCourierAccountSerializer
 from ..models import Order, OrderStatus, OrderDish, Restaurant, CourierLocation, Dish
 from .restaurant import RestaurantSerializerForOrder, RestaurantSerializerForCourier
@@ -25,14 +25,14 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
                   'order_details', 'delivery_address']
 
     def get_dishes(self, obj: Order):
-        if getattr(obj, "dishes"):
+        if hasattr(obj, "dishes"):
             # prefetched in queryset
             dishes = obj.dishes
         else:
             dishes = Dish.objects.filter(
-                orderdish__order=obj
+                order_dishes__order=obj
             ).annotate(
-                quantity=F('orderdish__quantity')
+                quantity=F('order_dishes__quantity')
             )
         return DishInOrderSerializer(
             dishes,
@@ -46,7 +46,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['order', 'summary', 'order_details',
+        fields = ['id', 'summary', 'order_details',
                   'delivery_address', 'delivery_location']
         read_only_fields = ['order', 'summary']
         extra_kwargs = {'delivery_address': {'required': True}}
@@ -54,15 +54,16 @@ class OrderSerializer(serializers.ModelSerializer):
     @atomic
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
-        if not instance.dishes.exists():
+        if not instance.order_dishes.exists():
             raise ValidationError("The order is empty")
 
         order_location = GEOSGeometry(
             f'POINT({validated_data["delivery_location"][0]} {validated_data["delivery_location"][1]})',
             srid=4326
         )
+        first_dish = instance.order_dishes.first()
         restaurant = Restaurant.objects.filter(
-            dish__id=instance.dishes[0].id,
+            dishes__order_dishes=first_dish,
             location__dwithin=(order_location, settings.POSSIBLE_USER_DISTANCE)
         ).first()
 
@@ -89,7 +90,7 @@ class OrderWithFirstStatusSerializer(serializers.ModelSerializer):
                   'created_at']
 
     def get_order_status(self, obj):
-        if getattr(obj, "last_status"):
+        if hasattr(obj, "last_status"):
             return OrderStatusSerializer(
                 # [0] as it was prefetched
                 obj.last_status[0], context=self.context
@@ -97,9 +98,7 @@ class OrderWithFirstStatusSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['created_at'] = datetime.fromtimestamp(
-            instance.created_at.created_at()
-        ).strftime('%Y-%m-%d %H:%M:%S')
+        rep['created_at'] = instance.created_at.strftime('%Y-%m-%d %H:%M:%S')
         return rep
 
 
@@ -114,21 +113,12 @@ class OrderWithStatusSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'summary', 'order_details',
                   'delivery_address', 'order_status',
-                  'restaurant', 'created_tm', 'dishes',
+                  'restaurant', 'created_at', 'dishes',
                   'location', 'delivery_location']
 
     def get_dishes(self, obj: Order):
-        if getattr(obj, "dishes"):
-            # prefetched in queryset
-            dishes = obj.dishes
-        else:
-            dishes = Dish.objects.filter(
-                orderdish__order=obj
-            ).annotate(
-                quantity=F('orderdish__quantity')
-            )
-        return DishInOrderSerializer(
-            dishes,
+        return OrderedDishSerializer(
+            obj.order_dishes.all(),
             many=True,
             context=self.context
         ).data
@@ -143,7 +133,7 @@ class OrderWithStatusSerializer(serializers.ModelSerializer):
     def get_restaurant(self, obj: Order):
         return RestaurantSerializerForCourier(
             Restaurant.objects.filter(
-                dish__orderdish__order=obj
+                dishes__order_dishes__order=obj
             ).first(),
             context=self.context
         ).data
@@ -154,8 +144,8 @@ class OrderWithStatusSerializer(serializers.ModelSerializer):
                     status__in=OrderStatus.FINISHED_STATUSES
             ).exists():
                 location = CourierLocation.objects.filter(
-                    courier__order=obj
-                ).latest('date')
+                    courier__orders=obj
+                ).latest('created_at')
                 return {
                     "latitude": location.location.y,
                     "longitude": location.location.x
@@ -165,23 +155,38 @@ class OrderWithStatusSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['created_tm'] = datetime.fromtimestamp(
-            instance.created_tm.created_at()
-        ).strftime('%Y-%m-%d %H:%M:%S')
+        rep['created_at'] = instance.created_at.strftime('%Y-%m-%d %H:%M:%S')
         return rep
 
 
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderStatus
-        fields = ['status', 'timestamp']
+        fields = ['status', 'created_at']
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['timestamp'] = datetime.fromtimestamp(
-            instance.created_at.created_at()
-        ).strftime('%Y-%m-%d %H:%M:%S')
+        rep['timestamp'] = instance.created_at.strftime('%Y-%m-%d %H:%M:%S')
         return rep
+
+    def validate(self, attrs):
+        order = self.context.get("order")
+        if order.courier and order.courier.user == self.context["request"].user:
+            if attrs['status'] == OrderStatus.CANCELLED:
+                if order.statuses.filter(
+                        status=OrderStatus.DELIVERED
+                ).exists():
+                    raise ValidationError("This order is already delivered")
+            elif attrs['status'] == OrderStatus.DELIVERED:
+                if order.statuses.filter(
+                        status=OrderStatus.CANCELLED
+                ).exists():
+                    raise ValidationError("This order is already canceled")
+            else:
+                raise ValidationError("Invalid status transition")
+        elif not self.context["request"].user.is_superuser:
+            raise PermissionDenied
+        return attrs
 
 
 class OrderDishSerializer(serializers.ModelSerializer):
@@ -212,7 +217,7 @@ class OrderDishWithOrderIdSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class CourierOrderDetailWithStatusSerializer(serializers.ModelSerializer):
+class CourierOrderDetailSerializer(serializers.ModelSerializer):
     delivery_location = PointField(required=True)
     restaurant = serializers.SerializerMethodField()
     dishes = serializers.SerializerMethodField()
@@ -221,31 +226,53 @@ class CourierOrderDetailWithStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'user', 'created_at', 'summary',
-                  'order_details', 'delivery_address', 'order_status',
+                  'order_details', 'delivery_address',
                   'delivery_location', 'restaurant', 'dishes',
                   'created_at']
 
     def get_dishes(self, obj: Order):
-        if getattr(obj, "dishes"):
-            return DishInOrderSerializer(
-                # prefetched in queryset
-                obj.dishes,
-                many=True,
-                context=self.context
-            ).data
-        return None
+        return OrderedDishSerializer(
+            obj.order_dishes.all(),
+            many=True,
+            context=self.context
+        ).data
 
     def get_restaurant(self, obj: Order):
         return RestaurantSerializerForCourier(
             Restaurant.objects.filter(
-                dish__orderdish__order=obj
+                dishes__order_dishes__order=obj
             ).first(),
             context=self.context
         ).data
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['created_at'] = datetime.fromtimestamp(
-            instance.created_at.created_at()
-        ).strftime('%Y-%m-%d %H:%M:%S')
+        rep['created_at'] = instance.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        return rep
+
+
+class OrderRecreationDetailSerializer(serializers.ModelSerializer):
+    restaurant_id = serializers.SerializerMethodField()
+    dishes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = ['id', 'restaurant_id', 'created_at', 'dishes']
+
+    def get_dishes(self, obj: Order):
+        return OrderedDishSerializer(
+            obj.order_dishes.all(),
+            many=True,
+            context=self.context
+        ).data
+
+    def get_restaurant_id(self, obj: Order):
+        restaurant = Restaurant.objects.filter(
+            dishes__order_dishes__order=obj
+        ).first()
+        return restaurant and restaurant.id
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['created_at'] = instance.created_at.strftime('%Y-%m-%d %H:%M:%S')
         return rep

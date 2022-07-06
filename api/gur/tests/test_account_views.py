@@ -71,7 +71,7 @@ class AccountViewTests(APITestCase):
 
         response = self.client.get(url, {}, **self.header, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data['first_name'], '', response.data['first_name'])
+        self.assertEqual(response.data['first_name'], None, response.data['first_name'])
         self.assertEqual(response.data['admin'], False, response.data['admin'])
         self.assertEqual(response.data['partial_admin'], False, response.data['partial_admin'])
 
@@ -81,20 +81,24 @@ class AccountViewTests(APITestCase):
         response = self.client.put(url, {'first_name': 'Igor'}, **self.header, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(response.data['first_name'], 'Igor', response.data['first_name'])
-        self.assertEqual(response.data['tel_num'], '', response.data['tel_num'])
+        self.assertEqual(response.data['tel_num'], None, response.data['tel_num'])
 
     def test_retrieve_courier_account(self):
         url = reverse('courier-profile')
 
         response = self.client.get(url, {}, **self.header, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data['first_name'], '', response.data['first_name'])
-        self.assertEqual(response.data['is_courier'], True, response.data['is_courier'])
+        self.assertEqual(response.data['first_name'], None, response.data['first_name'])
 
     def test_update_courier_account(self):
         url = reverse('courier-profile')
 
-        response = self.client.put(url, {'first_name': 'Igor'}, **self.header, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        response = self.client.put(
+            url,
+            {'first_name': 'Igor'},
+            **self.header,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['first_name'], 'Igor', response.data['first_name'])
-        self.assertEqual(response.data['tel_num'], '', response.data['tel_num'])
+        self.assertEqual(response.data['tel_num'], None, response.data['tel_num'])

@@ -59,12 +59,6 @@ User = get_user_model()
 
 
 class AccountInfo(models.Model):
-    user = models.ForeignKey(
-        User,
-        verbose_name=_('factory'),
-        related_name='accounts',
-        on_delete=models.CASCADE
-    )
     first_name = models.CharField(
         verbose_name=_('First name'),
         max_length=70,
@@ -87,6 +81,13 @@ class AccountInfo(models.Model):
 
 
 class CourierAccount(AccountInfo):
+    user = models.ForeignKey(
+        User,
+        verbose_name=_('User'),
+        related_name='courier',
+        on_delete=models.CASCADE
+    )
+
     class Meta:
         verbose_name = "Courier account"
         verbose_name_plural = "Courier accounts"
@@ -96,6 +97,13 @@ class CourierAccount(AccountInfo):
 
 
 class UserAccount(AccountInfo):
+    user = models.ForeignKey(
+        User,
+        verbose_name=_('User'),
+        related_name='user',
+        on_delete=models.CASCADE
+    )
+
     class Meta:
         verbose_name = "User account"
         verbose_name_plural = "User accounts"
@@ -213,7 +221,6 @@ class Dish(models.Model):
     )
     name = models.CharField(
         verbose_name=_('Name'),
-        null=True, blank=True,
         max_length=150
     )
     description = models.CharField(
@@ -314,7 +321,7 @@ class OrderStatus(models.Model):
         verbose_name = "Order status"
         verbose_name_plural = "Order statuses"
         unique_together = (('order', 'status'),)
-        ordering = ('timestamp', 'order',)
+        ordering = ('created_at', 'order',)
 
     OPEN = "O"
     PREPARING = "P"

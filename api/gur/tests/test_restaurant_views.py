@@ -12,7 +12,7 @@ class RestaurantViewTests(APITestCase):
         user = CustomUser.objects.create_user(email='bla@gmail.com', password='password')
         user_account = UserAccount.objects.create(user=user)
         self.header = self.get_header_for_user(user)
-        RestaurantAdmin.objects.create(rest_id_id=2, user_id=user_account)
+        RestaurantAdmin.objects.create(rest_id=2, user_account=user_account)
 
         admin_user = CustomUser.objects.create_superuser(email='bla1@gmail.com', password='password')
         UserAccount.objects.create(user=admin_user)
@@ -59,7 +59,7 @@ class RestaurantViewTests(APITestCase):
 
         response = self.client.post(url, {}, **self.header, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.content)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_restaurants_successfully(self):
         url = reverse('restaurants')
@@ -74,7 +74,7 @@ class RestaurantViewTests(APITestCase):
         }, **self.admin_header, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
-        self.assertEqual(response.data['rest_id'], 3, response.content)
+        self.assertEqual(response.data['id'], 3, response.content)
 
     def test_update_restaurants_successfully(self):
         url = reverse('restaurants-admin', kwargs={"pk": 1})
@@ -88,7 +88,7 @@ class RestaurantViewTests(APITestCase):
             }
         }, **self.admin_header, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        self.assertEqual(response.data['rest_id'], 1, response.content)
+        self.assertEqual(response.data['id'], 1, response.content)
 
     def test_update_restaurants_non_admin(self):
         url = reverse('restaurants-admin', kwargs={"pk": 1})
@@ -123,7 +123,7 @@ class RestaurantViewTests(APITestCase):
 
         response = self.client.delete(url, {}, **self.admin_header, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND, response.content)
-        self.assertEqual(response.data['error'], 'Такого ресторану не існує', response.data)
+        self.assertEqual(len(response.data), 1)
 
     def test_delete_restaurant_non_admin(self):
         url = reverse('restaurants-admin', kwargs={"pk": 1})

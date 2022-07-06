@@ -33,7 +33,7 @@ class RestaurantApiView(ListAPIView, CreateAPIView):
             return Restaurant.objects.all()
 
         return Restaurant.objects.filter(
-            restaurantadmin__user_id__user=self.request.user
+            restaurant_admins__user_account__user=self.request.user
         )
 
 

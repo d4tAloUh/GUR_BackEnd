@@ -6,61 +6,59 @@ from django.db.models import F, Prefetch
 from django.db.transaction import atomic
 from rest_framework.generics import RetrieveAPIView, ListAPIView, UpdateAPIView, CreateAPIView, get_object_or_404
 
-from rest_framework.permissions import IsAuthenticated
 from ..models import Order, Dish, OrderStatus, CourierAccount
 from ..permissions import IsCourier
 from ..serializers.courier import CourierLocationSerializer, CourierFreeOrderUpdateSerializer
 from ..serializers.order import (
-    CourierOrderDetailWithStatusSerializer,
+    CourierOrderDetailSerializer,
     OrderWithFirstStatusSerializer,
 )
 
 
 class CourierCurrentOrderApiView(RetrieveAPIView):
-    serializer_class = CourierOrderDetailWithStatusSerializer
-    permission_classes = [IsAuthenticated]
+    serializer_class = CourierOrderDetailSerializer
+    permission_classes = [IsCourier]
 
     def get_object(self):
-        return Order.objects.filter(
+        queryset = Order.objects.filter(
             courier__user=self.request.user,
-            orderstatus__status="D"
+            statuses__status="D"
         ).exclude(
-            orderstatus__status__in=OrderStatus.FINISHED_STATUSES
+            statuses__status__in=OrderStatus.FINISHED_STATUSES
         ).prefetch_related(
             Prefetch(
                 "order_dishes__dish",
                 queryset=Dish.objects.annotate(
-                    quantity=F('orderdish__quantity')
+                    quantity=F('order_dishes__quantity')
                 ),
-                to_attr="dishes"
+                to_attr="order_dishes"
             ),
-        ).first()
+        )
+        return get_object_or_404(queryset)
 
 
-class CourierFreeOrderApiView(ListAPIView):
-    queryset = Order.objects.all()
-    serializer_class = CourierOrderDetailWithStatusSerializer
-    permission_classes = [IsAuthenticated]
+class CourierFreeOrderListApiView(ListAPIView):
+    serializer_class = CourierOrderDetailSerializer
+    permission_classes = [IsCourier]
 
     def get_queryset(self):
         return Order.objects.filter(
             courier__isnull=True,
-            orderstatus__status="P"
+            statuses__status="P"
         ).exclude(
-            orderstatus__status__in=OrderStatus.FINISHED_STATUSES
+            statuses__status__in=OrderStatus.FINISHED_STATUSES
         )
 
 
 class CourierUpdateFreeOrderApiView(UpdateAPIView):
-    # TODO: add permission check User should be courier
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCourier]
     serializer_class = CourierFreeOrderUpdateSerializer
 
     def get_queryset(self):
         return Order.objects.filter(
-            orderstatus__status=OrderStatus.PREPARING
+            statuses__status=OrderStatus.PREPARING
         ).exclude(
-            orderstatus__status__in=OrderStatus.FINISHED_STATUSES
+            statuses__status__in=OrderStatus.FINISHED_STATUSES
         ).prefetch_related("statuses")
 
     def get_serializer_context(self):
@@ -104,17 +102,17 @@ class CourierLocationUpdateApiView(CreateAPIView):
     def perform_create(self, serializer):
         courier_account = get_object_or_404(
             CourierAccount.objects.all(),
-            {"user": self.request.user}
+            **{"user": self.request.user}
         )
         order = get_object_or_404(
             Order.objects.filter(
                 courier=courier_account
             ),
-            {"id": self.kwargs["order_id"]}
+            **{"id": self.kwargs["order_id"]}
         )
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            f"order_{order.order_id}",
+            f"order_{order.id}",
             {
                 'type': 'event.location',
                 'content': {
@@ -126,14 +124,13 @@ class CourierLocationUpdateApiView(CreateAPIView):
 
 
 class CourierOrderListApiView(ListAPIView):
-    queryset = Order.objects.all()
     serializer_class = OrderWithFirstStatusSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCourier]
 
     def get_queryset(self):
         return Order.objects.filter(
             courier_id__user=self.request.user
-        ).order_by('-created_tm').prefetch_related(
+        ).order_by('-created_at').prefetch_related(
             Prefetch(
                 "statuses",
                 OrderStatus.objects.order_by("-created_at"),
@@ -142,8 +139,8 @@ class CourierOrderListApiView(ListAPIView):
         )
 
 
-class CourierOrderApiView(RetrieveAPIView):
-    serializer_class = CourierOrderDetailWithStatusSerializer
+class CourierRetrieveOrderApiView(RetrieveAPIView):
+    serializer_class = CourierOrderDetailSerializer
     permission_classes = [IsCourier]
 
     def get_queryset(self):
@@ -153,8 +150,8 @@ class CourierOrderApiView(RetrieveAPIView):
             Prefetch(
                 "order_dishes__dish",
                 queryset=Dish.objects.annotate(
-                    quantity=F('orderdish__quantity')
+                    quantity=F('order_dishes__quantity')
                 ),
-                to_attr="dishes"
+                to_attr="order_dishes"
             ),
         )

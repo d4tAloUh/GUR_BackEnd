@@ -26,10 +26,10 @@ class CourierFreeOrderUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         courier_location = validated_data.get("courier_location")
 
-        if courier_location.coordinates.distance(
-                instance.delivery_location
-        ).m > settings.POSSIBLE_COURIER_DISTANCE:
-            raise ValidationError("You are too far from order")
+        if courier_location.transform(900913, clone=True).distance(
+                instance.delivery_location.transform(900913, clone=True)
+        ) > settings.POSSIBLE_COURIER_DISTANCE:
+            raise ValidationError({"courier_location": "You are too far from order"})
 
         courier_account = self.context["courier"]
 

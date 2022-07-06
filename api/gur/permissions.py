@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from api.gur.models import RestaurantAdmin, CourierAccount
+from .models import RestaurantAdmin, CourierAccount
 
 
 class IsAdmin(BasePermission):
@@ -17,7 +17,7 @@ class IsRestaurantAdmin(BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
         return RestaurantAdmin.objects.filter(
-            user__user=request.user,
+            user_account__user=request.user,
             rest=obj
         ).exists() or request.user.is_superuser
 
